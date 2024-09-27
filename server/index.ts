@@ -18,8 +18,13 @@ app.use(cookieParser())
 
 //Routes
 app.get('/', (req, res) => {
-    res.json({ msg: 'Hello'})
+    res.json({ 
+        msg: 'Hello'
+    })
 })
+
+//Database
+import './config/database'
 
 //server listening
 const PORT = process.env.PORT || 5000
