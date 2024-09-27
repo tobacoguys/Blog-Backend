@@ -23,7 +23,11 @@ const authCtrl = {
 
       await newUser.save();
 
-      res.json({ msg: 'Register successfully', data: newUser });
+      res.json({ 
+        status: 'OK',
+        msg: 'Register successfully', 
+        data: newUser 
+      });
     } catch (err) {
       next(err);  
     }
