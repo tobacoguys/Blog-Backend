@@ -22,9 +22,13 @@ const useSchema = new mongoose.Schema({
         type: String,
         default: "https://static.thenounproject.com/png/363640-200.png"
     },
+    role: {
+        type: String,
+        default: 'user' //admin
+    },
     type: {
         type: String,
-        default: 'normal'
+        default: 'normal' //fast
     }
 },{
     timestamps: true

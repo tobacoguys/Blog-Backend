@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import Users from '../models/userModels';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { generateActiveToken} from '../config/generateToken'
 
 const authCtrl = {
   register: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -15,18 +17,16 @@ const authCtrl = {
 
       const passwordHash = await bcrypt.hash(password, 12);
 
-      const newUser = new Users({
-        name,
-        email,
-        password: passwordHash,
-      });
+      const newUser = ({name, email, password: passwordHash });
 
-      await newUser.save();
+
+      const active_token = generateActiveToken(newUser);
 
       res.json({ 
         status: 'OK',
         msg: 'Register successfully', 
-        data: newUser 
+        data: newUser,
+        active_token
       });
     } catch (err) {
       next(err);  
