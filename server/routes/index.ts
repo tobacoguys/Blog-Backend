@@ -1,5 +1,5 @@
 import authRouter from './authRouter'
-import categoryRouter from './categoryRouter'
+import categoryRouter from './categoryRouter';
 
 
 const routes = {
