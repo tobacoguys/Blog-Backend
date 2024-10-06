@@ -18,7 +18,7 @@ app.use(morgan('dev'))
 app.use(cookieParser())
 
 //Routes
-app.use('/api', routes.authRouter)
+app.use('/auth', routes.authRouter)
 app.use('/category', routes.categoryRouter)
 
 //Database
