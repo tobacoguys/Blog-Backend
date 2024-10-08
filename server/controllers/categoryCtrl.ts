@@ -51,6 +51,18 @@ const categoryCtrl = {
       res.status(500).json({ msg: err.message })
     }
   },
+
+  deleteCategory: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const category = await categoryModels.findByIdAndDelete(req.params.id)
+      if(!category) 
+        res.status(400).json({msg: "Category does not exists."})
+
+      res.json({ msg: "Delete Success!" })
+    } catch (err: any) {
+      res.status(500).json({ msg: err.message })
+    }
+  }
 }
 
   
