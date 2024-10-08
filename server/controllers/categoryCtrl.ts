@@ -36,7 +36,23 @@ const categoryCtrl = {
         res.status(500).json({ msg: err.message })
     }
   },
+
+  updateCategory: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const category = await categoryModels.findOneAndUpdate({
+        _id: req.params.id
+      }, { name: (req.body.name).toLowerCase() })
+
+      if (!category) {
+        res.status(404).json({ msg: 'Category not found' });
+      }
+      res.json({ msg: "Update Success!" })
+    } catch (err: any) {
+      res.status(500).json({ msg: err.message })
+    }
+  },
 }
 
+  
 
 export default categoryCtrl;
