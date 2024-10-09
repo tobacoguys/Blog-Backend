@@ -1,10 +1,19 @@
 import { Request, Response } from 'express'
 import categoryModels from '../models/categoryModels'
+import { IReqAuth } from '../config/interface'
 
 
 const categoryCtrl = {
-  createCategory: async (req: Request, res: Response): Promise<void> => {
+  createCategory: async (req: IReqAuth, res: Response): Promise<void> => {
     try {
+      if(!req.user){
+        res.status(400).json({msg: "Invalid Authentication."})
+        return;
+      }
+
+      if(req.user.role !== 'admin'){
+        res.status(400).json({msg: "Only administrators are allowed to create."})
+      }
 
       const { name } = req.body;
 

@@ -20,6 +20,7 @@ app.use(cookieParser())
 //Routes
 app.use('/auth', routes.authRouter)
 app.use('/category', routes.categoryRouter)
+app.use('/blog', routes.blogRouter)
 
 //Database
 import './config/database'

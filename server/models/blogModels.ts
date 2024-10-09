@@ -7,19 +7,19 @@ const blogSchema = new mongoose.Schema({
     type: String,
     require: true,
     trim: true,
-    minLength: 10,
+    minLength: 1,
     maxLength: 50
   },
   content: {
     type: String,
     require: true,
-    minLength: 2000
+    minLength: 2
   },
   description: {
     type: String,
     require: true,
     trim: true,
-    minLength: 50,
+    minLength: 5,
     maxLength: 200
   },
   thumbnail:{

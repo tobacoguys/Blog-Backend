@@ -24,7 +24,7 @@ const useSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        default: 'admin' //admin
+        default: 'user' //admin
     },
     type: {
         type: String,
@@ -34,4 +34,4 @@ const useSchema = new mongoose.Schema({
     timestamps: true
 })
 
-export default mongoose.model('User', useSchema)
+export default mongoose.model('user', useSchema)
