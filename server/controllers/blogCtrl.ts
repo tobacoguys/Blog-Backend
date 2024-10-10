@@ -172,6 +172,32 @@ const blogCtrl = {
     }
   },
 
+  getBlogsByUser: async (req: IReqAuth, res: Response): Promise<void> => {
+    try {
+      const { userId } = req.params;
+  
+      const { page, limit, skip } = Pagination(req);
+  
+      const blogs = await blogModels.find({ user: userId })
+        .populate("user", "-password")
+        .populate("category")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+  
+      const total = await blogModels.countDocuments({ user: userId });
+  
+      if (!blogs.length) {
+        res.status(404).json({ msg: "No blogs found for this user." });
+      }
+  
+      res.json({ blogs, total, page, limit });
+    } catch (err: any) {
+      res.status(500).json({ msg: err.message });
+    }
+  }
+  
+
 }
 
 
