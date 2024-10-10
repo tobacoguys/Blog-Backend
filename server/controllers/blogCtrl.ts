@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { IReqAuth } from '../config/interface'
 import blogModels from '../models/blogModels';
+import mongoose from 'mongoose';
 
 
 const Pagination = (req: IReqAuth) => {
@@ -102,6 +103,75 @@ const blogCtrl = {
         res.status(500).json({msg: err.message})
     }
   },
+
+  getBlogsByCategory: async (req: Request, res: Response): Promise<void> => {
+    const { limit, skip } = Pagination(req)
+
+    try {
+      const Data = await blogModels.aggregate([
+        {
+          $facet: {
+            totalData: [
+              { 
+                $match:{ 
+                  category: new mongoose.Types.ObjectId(req.params.id) 
+                } 
+              },
+              // User
+              {
+                $lookup:{
+                  from: "users",
+                  let: { user_id: "$user" },
+                  pipeline: [
+                    { $match: { $expr: { $eq: ["$_id", "$$user_id"] } } },
+                    { $project: { password: 0 }}
+                  ],
+                  as: "user"
+                }
+              },
+              // array -> object
+              { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
+              // Sorting
+              { $sort: { createdAt: -1 } },
+              { $skip: skip },
+              { $limit: limit }
+            ],
+            totalCount: [
+              { 
+                $match: { 
+                  category: new mongoose.Types.ObjectId(req.params.id) 
+                } 
+              },
+              { $count: 'count' }
+            ]
+          }
+        },
+        {
+          $project: {
+            count: { $arrayElemAt: ["$totalCount.count", 0] },
+            totalData: 1
+          }
+        }
+      ])
+
+      const blogs = Data[0].totalData;
+      const count = Data[0].count;
+
+      // Pagination
+      let total = 0;
+
+      if(count % limit === 0){
+        total = count / limit;
+      }else {
+        total = Math.floor(count / limit) + 1;
+      }
+
+      res.json({ blogs, total })
+    } catch (err: any) {
+        res.status(500).json({msg: err.message})
+    }
+  },
+
 }
 
 
