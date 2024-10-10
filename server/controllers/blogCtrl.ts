@@ -195,8 +195,21 @@ const blogCtrl = {
     } catch (err: any) {
       res.status(500).json({ msg: err.message });
     }
-  }
-  
+  },
+  getBlog: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const blog = await blogModels.findOne({_id: req.params.id})
+      .populate("user", "-password")
+
+      if(!blog){
+        res.status(400).json({ msg: "Blog does not exist." })
+      }
+
+        res.json(blog)
+    } catch (err: any) {
+        res.status(500).json({ msg: err.message })
+    }
+  },
 
 }
 
