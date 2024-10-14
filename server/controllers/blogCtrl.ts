@@ -21,7 +21,7 @@ const blogCtrl = {
 
     if(req.user.role !== 'admin'){
         res.status(400).json({msg: "Only administrators are allowed to create."})
-      }
+    }
 
     try {
       const { title, content, description, cover, category } = req.body
@@ -210,7 +210,30 @@ const blogCtrl = {
         res.status(500).json({ msg: err.message })
     }
   },
+  updateBlog: async (req: IReqAuth, res: Response): Promise<void> => {
+    if(!req.user){
+        res.status(400).json({msg: "Invalid Authentication."})
+        return;
+    }
 
+    if(req.user.role !== 'admin'){
+        res.status(400).json({msg: "Only administrators are allowed to create."})
+    }
+
+    try {
+      const blog = await blogModels.findOneAndUpdate({
+        _id: req.params.id, user: req.user._id
+      }, req.body)
+
+      if(!blog)
+        res.status(400).json({msg: "Invalid Authentication."})
+
+      res.json({ msg: 'Update Success!', blog })
+
+    } catch (err: any) {
+        res.status(500).json({msg: err.message})
+    }
+  },
 }
 
 
