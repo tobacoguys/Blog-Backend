@@ -21,6 +21,7 @@ app.use(cookieParser())
 app.use('/auth', routes.authRouter)
 app.use('/category', routes.categoryRouter)
 app.use('/blog', routes.blogRouter)
+app.use('/comment', routes.commentRouter)
 
 //Database
 import './config/database'
