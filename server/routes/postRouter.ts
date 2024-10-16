@@ -8,9 +8,9 @@ const router = express.Router()
 router.post('/create', auth, postCtrl.createPost)
 router.get('/getHomePost', postCtrl.getHomePosts)
 router.get('/getPost/category/:id', postCtrl.getPostsByCategory)
-router.get('/getBlog/user/:id', postCtrl.getPostsByUser)
+router.get('/getPost/user/:id', postCtrl.getPostsByUser)
 router.route('/:id')
   .get(postCtrl.getPostsById)
   .put(auth, postCtrl.updatePost)
-
+router.delete('/deletePost/:id', auth, postCtrl.deletePost)
 export default router;

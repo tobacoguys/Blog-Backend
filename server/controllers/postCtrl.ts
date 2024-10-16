@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { IReqAuth } from '../config/interface'
 import postModels from '../models/postModels';
 import mongoose from 'mongoose';
+import commentModels from '../models/commentModels';
 
 
 const Pagination = (req: IReqAuth) => {
@@ -232,6 +233,37 @@ const postCtrl = {
 
     } catch (err: any) {
         res.status(500).json({msg: err.message})
+    }
+  },
+
+  deletePost: async (req: IReqAuth, res: Response): Promise<void> => {
+    if(!req.user){
+      res.status(400).json({msg: "Invalid Authentication."})
+      return;
+    }
+
+    if(req.user.role !== 'admin'){
+      res.status(400).json({msg: "Only administrators are allowed to delete."})
+  }
+
+    try {
+      // Delete Blog
+      const post = await postModels.findOneAndDelete({
+        _id: req.params.id, user: req.user._id
+      })
+
+      if(!post){ 
+        res.status(400).json({msg: "Post does not exist!"})
+        return;
+      }
+
+      // Delete Comments
+      await commentModels.deleteMany({ post_id: post._id })
+
+      res.json({ msg: 'Delete Success!' })
+
+    } catch (err: any) {
+      res.status(500).json({msg: err.message})
     }
   },
 }
