@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { IReqAuth } from '../config/interface'
-import blogModels from '../models/blogModels';
+import postModels from '../models/postModels';
 import mongoose from 'mongoose';
 
 
@@ -12,8 +12,8 @@ const Pagination = (req: IReqAuth) => {
   return { page, limit, skip };
 }
 
-const blogCtrl = {
-  createBlog: async (req: IReqAuth, res: Response): Promise<void> => {
+const postCtrl = {
+  createPost: async (req: IReqAuth, res: Response): Promise<void> => {
     if(!req.user){
         res.status(400).json({msg: "Invalid Authentication."})
         return;
@@ -26,7 +26,7 @@ const blogCtrl = {
     try {
       const { title, content, description, cover, category } = req.body
 
-      const newBlog = new blogModels({
+      const newPost = new postModels({
         user: req.user._id,
         title: title.toLowerCase(), 
         content,
@@ -35,9 +35,9 @@ const blogCtrl = {
         category
       })
 
-      await newBlog.save()
+      await newPost.save()
       res.json({
-        ...newBlog._doc,
+        ...newPost._doc,
         user: req.user
       })
 
@@ -46,9 +46,9 @@ const blogCtrl = {
     }
   },
 
-  getHomeBlogs: async (req: Request, res: Response): Promise<void> => {
+  getHomePosts: async (req: Request, res: Response): Promise<void> => {
     try {
-        const blogs = await blogModels.aggregate([
+        const posts = await postModels.aggregate([
             // User
             {
               $lookup:{
@@ -97,18 +97,18 @@ const blogCtrl = {
             }
           ])
     
-          res.json(blogs)
+          res.json(posts)
     
     } catch (err: any) {
         res.status(500).json({msg: err.message})
     }
   },
 
-  getBlogsByCategory: async (req: Request, res: Response): Promise<void> => {
+  getPostsByCategory: async (req: Request, res: Response): Promise<void> => {
     const { limit, skip } = Pagination(req)
 
     try {
-      const Data = await blogModels.aggregate([
+      const Data = await postModels.aggregate([
         {
           $facet: {
             totalData: [
@@ -154,7 +154,7 @@ const blogCtrl = {
         }
       ])
 
-      const blogs = Data[0].totalData;
+      const posts = Data[0].totalData;
       const count = Data[0].count;
 
       // Pagination
@@ -166,51 +166,51 @@ const blogCtrl = {
         total = Math.floor(count / limit) + 1;
       }
 
-      res.json({ blogs, total })
+      res.json({ posts, total })
     } catch (err: any) {
         res.status(500).json({msg: err.message})
     }
   },
 
-  getBlogsByUser: async (req: IReqAuth, res: Response): Promise<void> => {
+  getPostsByUser: async (req: IReqAuth, res: Response): Promise<void> => {
     try {
       const { userId } = req.params;
   
       const { page, limit, skip } = Pagination(req);
   
-      const blogs = await blogModels.find({ user: userId })
+      const posts = await postModels.find({ user: userId })
         .populate("user", "-password")
         .populate("category")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
   
-      const total = await blogModels.countDocuments({ user: userId });
+      const total = await postModels.countDocuments({ user: userId });
   
-      if (!blogs.length) {
+      if (!posts.length) {
         res.status(404).json({ msg: "No blogs found for this user." });
       }
   
-      res.json({ blogs, total, page, limit });
+      res.json({ posts, total, page, limit });
     } catch (err: any) {
       res.status(500).json({ msg: err.message });
     }
   },
-  getBlog: async (req: Request, res: Response): Promise<void> => {
+  getPostsById: async (req: Request, res: Response): Promise<void> => {
     try {
-      const blog = await blogModels.findOne({_id: req.params.id})
+      const posts = await postModels.findOne({_id: req.params.id})
       .populate("user", "-password")
 
-      if(!blog){
+      if(!posts){
         res.status(400).json({ msg: "Blog does not exist." })
       }
 
-        res.json(blog)
+        res.json(posts)
     } catch (err: any) {
         res.status(500).json({ msg: err.message })
     }
   },
-  updateBlog: async (req: IReqAuth, res: Response): Promise<void> => {
+  updatePost: async (req: IReqAuth, res: Response): Promise<void> => {
     if(!req.user){
         res.status(400).json({msg: "Invalid Authentication."})
         return;
@@ -221,14 +221,14 @@ const blogCtrl = {
     }
 
     try {
-      const blog = await blogModels.findOneAndUpdate({
+      const posts = await postModels.findOneAndUpdate({
         _id: req.params.id, user: req.user._id
       }, req.body)
 
-      if(!blog)
+      if(!posts)
         res.status(400).json({msg: "Invalid Authentication."})
 
-      res.json({ msg: 'Update Success!', blog })
+      res.json({ msg: 'Update Success!', posts })
 
     } catch (err: any) {
         res.status(500).json({msg: err.message})
@@ -237,4 +237,4 @@ const blogCtrl = {
 }
 
 
-export default blogCtrl;
+export default postCtrl;

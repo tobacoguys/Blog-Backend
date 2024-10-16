@@ -5,8 +5,8 @@ import { IComment } from '../config/interface'
 const commentSchema = new mongoose.Schema({
   user: { 
     type: mongoose.Types.ObjectId, ref: 'user' },
-    blog_id: mongoose.Types.ObjectId,
-    blog_user_id: mongoose.Types.ObjectId,
+    post_id: mongoose.Types.ObjectId,
+    post_user_id: mongoose.Types.ObjectId,
 
   content: { 
     type: String, 

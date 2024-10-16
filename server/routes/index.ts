@@ -1,12 +1,12 @@
 import authRouter from './authRouter'
 import categoryRouter from './categoryRouter';
-import blogRouter from './blogRouter';
+import postRouter from './postRouter';
 import commentRouter from './commentRouter';
 
 const routes = {
     authRouter,
     categoryRouter,
-    blogRouter,
+    postRouter,
     commentRouter
 }
 

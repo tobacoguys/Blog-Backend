@@ -22,15 +22,15 @@ const commentCtrl = {
     try {
       const { 
         content,
-        blog_id,
-        blog_user_id
+        post_id,
+        post_user_id
       } = req.body
 
       const newComment = new commentModels({ 
         user: req.user._id,
         content,
-        blog_id,
-        blog_user_id
+        post_id,
+        post_user_id
       })
 
       const data = {
@@ -41,7 +41,7 @@ const commentCtrl = {
 
         await newComment.save()
 
-        res.json(newComment)
+        res.json(data)
       
     } catch (err: any) {
         res.status(500).json({msg: err.message})

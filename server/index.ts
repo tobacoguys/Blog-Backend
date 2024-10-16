@@ -20,7 +20,7 @@ app.use(cookieParser())
 //Routes
 app.use('/auth', routes.authRouter)
 app.use('/category', routes.categoryRouter)
-app.use('/blog', routes.blogRouter)
+app.use('/post', routes.postRouter)
 app.use('/comment', routes.commentRouter)
 
 //Database
