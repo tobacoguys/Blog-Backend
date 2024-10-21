@@ -47,61 +47,88 @@ const postCtrl = {
     }
   },
 
+  // getHomePosts: async (req: Request, res: Response): Promise<void> => {
+  //   try {
+  //       const posts = await postModels.aggregate([
+  //           // User
+  //           {
+  //             $lookup:{
+  //               from: "users",
+  //               let: { user_id: "$user" },
+  //               pipeline: [
+  //                 { $match: { $expr: { $eq: ["$_id", "$$user_id"] } } },
+  //                 { $project: { password: 0 }}
+  //               ],
+  //               as: "user"
+  //             }
+  //           },
+  //           // array -> object
+  //           { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
+  //           // Category
+  //           {
+  //             $lookup: {
+  //               "from": "categories",
+  //               "localField": "category",
+  //               "foreignField": "_id",
+  //               "as": "category"
+  //             }
+  //           },
+  //           // array -> object
+  //           { $unwind: "$category" },
+  //           // Sorting
+  //           { $sort: { "createdAt": -1 } },
+  //           // Group by category
+  //           {
+  //             $group: {
+  //               _id: "$category._id",
+  //               name: { $first: "$category.name" },
+  //               blogs: { $push: "$$ROOT" },
+  //               count: { $sum: 1 }
+  //             }
+  //           },
+  //           // Pagination for blogs
+  //           {
+  //             $project: {
+  //               blogs: {
+  //                 $slice: ['$blogs', 0, 4]
+  //               },
+  //               count: 1,
+  //               name: 1
+  //             }
+  //           }
+  //         ])
+    
+  //         res.json(posts)
+    
+  //   } catch (err: any) {
+  //       res.status(500).json({msg: err.message})
+  //   }
+  // },
+
   getHomePosts: async (req: Request, res: Response): Promise<void> => {
     try {
-        const posts = await postModels.aggregate([
-            // User
-            {
-              $lookup:{
-                from: "users",
-                let: { user_id: "$user" },
-                pipeline: [
-                  { $match: { $expr: { $eq: ["$_id", "$$user_id"] } } },
-                  { $project: { password: 0 }}
-                ],
-                as: "user"
-              }
-            },
-            // array -> object
-            { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
-            // Category
-            {
-              $lookup: {
-                "from": "categories",
-                "localField": "category",
-                "foreignField": "_id",
-                "as": "category"
-              }
-            },
-            // array -> object
-            { $unwind: "$category" },
-            // Sorting
-            { $sort: { "createdAt": -1 } },
-            // Group by category
-            {
-              $group: {
-                _id: "$category._id",
-                name: { $first: "$category.name" },
-                blogs: { $push: "$$ROOT" },
-                count: { $sum: 1 }
-              }
-            },
-            // Pagination for blogs
-            {
-              $project: {
-                blogs: {
-                  $slice: ['$blogs', 0, 4]
-                },
-                count: 1,
-                name: 1
-              }
-            }
-          ])
-    
-          res.json(posts)
-    
+      const { page, limit, skip } = Pagination(req);
+  
+      const totalPosts = await postModels.countDocuments();
+  
+      const posts = await postModels.find()
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('user', 'name email');
+  
+      if (!posts.length) {
+        res.status(404).json({ msg: 'No posts found.' });
+      }
+
+      res.json({
+        totalPosts,
+        currentPage: page,
+        totalPages: Math.ceil(totalPosts / limit),
+        posts
+      });
     } catch (err: any) {
-        res.status(500).json({msg: err.message})
+      res.status(500).json({ msg: err.message });
     }
   },
 
@@ -264,104 +291,6 @@ const postCtrl = {
 
     } catch (err: any) {
       res.status(500).json({msg: err.message})
-    }
-  },
-  getComments: async (req: Request, res: Response) => {
-    const { limit, skip } = Pagination(req)
-
-    try {
-      const data = await commentModels.aggregate([
-        {
-          $facet: {
-            totalData:[
-              { $match: {
-                blog_id: new mongoose.Types.ObjectId(req.params.id),
-                comment_root: { $exists: false },
-                reply_user: { $exists: false }
-              }},
-              {
-                $lookup: {
-                  "from": "users",
-                  "let": { user_id: "$user" },
-                  "pipeline": [
-                    { $match: { $expr: { $eq: ["$_id", "$$user_id"] } } },
-                    { $project: { name: 1, avatar: 1 } }
-                  ], 
-                  "as": "user"
-                }
-              },
-              { $unwind: "$user" },
-              {
-                $lookup: {
-                  "from": "comments",
-                  "let": { cm_id: "$replyCM" },
-                  "pipeline": [
-                    { $match: { $expr: { $in: ["$_id", "$$cm_id"] } } },
-                    {
-                      $lookup: {
-                        "from": "users",
-                        "let": { user_id: "$user" },
-                        "pipeline": [
-                          { $match: { $expr: { $eq: ["$_id", "$$user_id"] } } },
-                          { $project: { name: 1, avatar: 1 } }
-                        ], 
-                        "as": "user"
-                      }
-                    },
-                    { $unwind: "$user" },
-                    {
-                      $lookup: {
-                        "from": "users",
-                        "let": { user_id: "$reply_user" },
-                        "pipeline": [
-                          { $match: { $expr: { $eq: ["$_id", "$$user_id"] } } },
-                          { $project: { name: 1, avatar: 1 } }
-                        ], 
-                        "as": "reply_user"
-                      }
-                    },
-                    { $unwind: "$reply_user" }
-                  ],
-                  "as": "replyCM"
-                }
-              },
-              { $sort: { createdAt: -1 } },
-              { $skip: skip },
-              { $limit: limit }
-            ],
-            totalCount: [
-              { $match: {
-                blog_id: new mongoose.Types.ObjectId(req.params.id),
-                comment_root: { $exists: false },
-                reply_user: { $exists: false }
-              }},
-              { $count: 'count' }
-            ]
-          }
-        },
-        {
-          $project: {
-            count: { $arrayElemAt: ["$totalCount.count", 0] },
-            totalData: 1
-          }
-        }
-      ])
-
-      const comments = data[0].totalData;
-      const count = data[0].count;
-
-      let total = 0;
-
-      if(count % limit === 0){
-        total = count / limit;
-      }else{
-        total = Math.floor(count / limit) + 1;
-      }
-
-      return res.json({ comments, total })
-      
-    } catch (err: any) {
-      return res.status(500).json({msg: err.message})
     }
   },
 
