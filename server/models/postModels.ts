@@ -15,14 +15,7 @@ const blogSchema = new mongoose.Schema({
     require: true,
     minLength: 2
   },
-  description: {
-    type: String,
-    require: true,
-    trim: true,
-    minLength: 5,
-    maxLength: 200
-  },
-  thumbnail:{
+  cover:{
     type: String,
     require: true
   },
@@ -32,4 +25,4 @@ const blogSchema = new mongoose.Schema({
 })
 
 
-export default mongoose.model<IBlog>('blog', blogSchema)
+export default mongoose.model<IBlog>('post', blogSchema)

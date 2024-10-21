@@ -13,4 +13,5 @@ router.route('/:id')
   .get(postCtrl.getPostsById)
   .put(auth, postCtrl.updatePost)
 router.delete('/deletePost/:id', auth, postCtrl.deletePost)
+
 export default router;

@@ -6,5 +6,4 @@ const router = express.Router()
 
 router.post('/create', auth, commentCtrl.createComment)
 
-
 export default router;

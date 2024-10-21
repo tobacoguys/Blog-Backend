@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
 import { IReqAuth } from '../config/interface'
-import mongoose from 'mongoose'
-import commentModels from '../models/commentModels'
+import commentModels from '../models/commentModels';
 
 
 const Pagination = (req: IReqAuth) => {
@@ -15,8 +14,8 @@ const Pagination = (req: IReqAuth) => {
 const commentCtrl = {
   createComment: async (req: IReqAuth, res: Response): Promise<void> => {
     if(!req.user){
-        res.status(400).json({msg: "invalid Authentication."})
-        return;
+      res.status(400).json({msg: "invalid Authentication."})
+      return;
     }
 
     try {
@@ -39,12 +38,14 @@ const commentCtrl = {
         createdAt: new Date().toISOString()
       }
 
-        await newComment.save()
+      await newComment.save()
 
-        res.json(data)
+      res.json({
+        data
+      })
       
     } catch (err: any) {
-        res.status(500).json({msg: err.message})
+      res.status(500).json({msg: err.message})
     }
   }
 }
